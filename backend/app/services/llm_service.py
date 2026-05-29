@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import google.generativeai as genai
+import requests
 
 from app.services.retrieval_service import RetrievedChunk
 from app.utils.logger import get_logger
@@ -19,61 +19,76 @@ Rules:
 4. If the answer cannot be found in the context, respond with exactly:
    "I don't have that information in the company documents."
 5. Always provide concise and professional answers.
-6. Mention relevant policy names when available.\
-"""
+6. Mention relevant policy names when available."""
+
+_MODELS_TO_TRY = [
+    "gemini-2.0-flash",
+    "gemini-1.5-flash",
+    "gemini-1.5-pro",
+    "gemini-pro",
+]
 
 
 class LLMService:
     """
-    Builds a grounded RAG prompt and calls the Google Gemini API.
-
-    Stateless after __init__ — safe for concurrent async requests.
-    temperature=0 enforces deterministic, factual answers.
+    Calls Gemini via direct REST API.
+    Supports both OAuth2 tokens (AQ. prefix) and API keys (AIza prefix).
+    Auto-tries multiple models until one succeeds.
     """
 
     def __init__(self, api_key: str, model_name: str) -> None:
         if not api_key:
             raise ValueError("GEMINI_API_KEY is not set. Add it to your .env file.")
-
-        genai.configure(api_key=api_key)
-        self._model = genai.GenerativeModel(
-            model_name=model_name,
-            generation_config=genai.GenerationConfig(
-                temperature=0.0,
-                max_output_tokens=1024,
-            ),
-        )
-        logger.info("LLMService ready | model=%s", model_name)
+        self._api_key = api_key
+        self._is_oauth = api_key.startswith("AQ.")
+        # Put configured model first in the list
+        self._models = [model_name] + [m for m in _MODELS_TO_TRY if m != model_name]
+        logger.info("LLMService ready | auth=%s", "oauth" if self._is_oauth else "apikey")
 
     def generate(self, question: str, chunks: list[RetrievedChunk]) -> str:
-        """
-        Generate a grounded answer from retrieved context chunks.
-
-        Returns the fallback phrase immediately if no chunks were retrieved,
-        saving an unnecessary API call.
-
-        Raises:
-            RuntimeError: If the Gemini API call fails.
-        """
         if not chunks:
-            logger.warning("No context chunks — returning fallback answer")
+            logger.warning("No context chunks — returning fallback")
             return FALLBACK
 
         prompt = self._build_prompt(question, chunks)
-        logger.info(
-            "Calling Gemini | model=%s | chunks=%d | question='%s'",
-            self._model.model_name, len(chunks), question,
-        )
+        last_error = None
 
+        for model in self._models:
+            try:
+                answer = self._call(model, prompt)
+                logger.info("Gemini OK | model=%s | length=%d", model, len(answer))
+                return answer
+            except Exception as exc:
+                logger.warning("Model %s failed: %s", model, str(exc)[:120])
+                last_error = exc
+
+        raise RuntimeError(f"All Gemini models failed. Last error: {last_error}")
+
+    def _call(self, model: str, prompt: str) -> str:
+        model_id = model.replace("models/", "")
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_id}:generateContent"
+
+        headers = {"Content-Type": "application/json"}
+        if self._is_oauth:
+            headers["Authorization"] = f"Bearer {self._api_key}"
+        else:
+            url += f"?key={self._api_key}"
+
+        payload = {
+            "contents": [{"parts": [{"text": prompt}]}],
+            "generationConfig": {"temperature": 0.0, "maxOutputTokens": 1024},
+        }
+
+        resp = requests.post(url, headers=headers, json=payload, timeout=30)
+
+        if not resp.ok:
+            raise RuntimeError(f"{resp.status_code} {resp.text[:300]}")
+
+        data = resp.json()
         try:
-            response = self._model.generate_content(prompt)
-            answer = response.text.strip()
-        except Exception as exc:
-            logger.error("Gemini API call failed: %s", exc)
-            raise RuntimeError(f"Gemini generation failed: {exc}") from exc
-
-        logger.info("Gemini response | length=%d chars", len(answer))
-        return answer
+            return data["candidates"][0]["content"]["parts"][0]["text"].strip()
+        except (KeyError, IndexError) as exc:
+            raise RuntimeError(f"Unexpected response: {data}") from exc
 
     def _build_prompt(self, question: str, chunks: list[RetrievedChunk]) -> str:
         context_blocks = []
@@ -87,14 +102,12 @@ class LLMService:
             context_blocks.append(
                 f"Document: {doc_name}\nPage: {chunk.page_number}\n\n{chunk.text}"
             )
-
         context = "\n\n---\n\n".join(context_blocks)
-
         return (
             f"{_SYSTEM_PROMPT}\n\n"
-            f"{'─' * 60}\n"
+            f"{'-' * 60}\n"
             f"{context}\n"
-            f"{'─' * 60}\n\n"
+            f"{'-' * 60}\n\n"
             f"QUESTION: {question}\n\n"
             "ANSWER (based strictly on the context above):"
         )

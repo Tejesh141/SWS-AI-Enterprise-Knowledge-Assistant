@@ -72,13 +72,11 @@ class GeminiService:
 
         genai.configure(api_key=api_key)
 
-        # temperature=0 → deterministic, factual answers (no creative variation)
-        # max_output_tokens=1024 → sufficient for document Q&A; prevents runaway responses
         self._model = genai.GenerativeModel(
             model_name=model_name,
             generation_config=genai.GenerationConfig(
                 temperature=0.0,
-                max_output_tokens=1024,
+                max_output_tokens=2048,
             ),
         )
 
@@ -177,7 +175,10 @@ class GeminiService:
             "3. Do NOT hallucinate facts, names, dates, or policies.\n"
             f'4. If the answer cannot be found in the context, respond with exactly:\n'
             f'   "{FALLBACK_ANSWER}"\n'
-            "5. Be concise and professional.\n"
+            "5. Provide a COMPLETE and DETAILED answer — do not truncate or summarise prematurely.\n"
+            "6. Format your answer using Markdown: use **bold** for key terms, "
+            "bullet points (- item) for lists, and numbered lists (1. item) for steps or ordered items.\n"
+            "7. Cover ALL relevant details present in the context for the question asked.\n"
         )
 
         # ── Context block ──────────────────────────────────────────────

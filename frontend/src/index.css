@@ -1,28 +1,111 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   html { @apply scroll-smooth; }
-  body { @apply font-sans antialiased; }
+  body {
+    font-family: 'Livvic', system-ui, sans-serif;
+    @apply antialiased;
+    background: #FAF7FF;
+  }
+  .dark body { background: #0D0A1A; }
+}
+
+@layer components {
+  .glass {
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+  }
+  .glass-dark {
+    background: rgba(20, 10, 40, 0.75);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(168, 85, 247, 0.15);
+  }
+  .glass-card {
+    @apply glass rounded-3xl shadow-glass;
+  }
+  .dark .glass-card {
+    @apply glass-dark;
+  }
+  .brand-btn {
+    background: linear-gradient(135deg, #7C3AED, #9333EA, #A855F7);
+    @apply text-white font-semibold rounded-2xl shadow-brand transition-all duration-200;
+  }
+  .brand-btn:hover {
+    background: linear-gradient(135deg, #6D28D9, #7C3AED, #9333EA);
+    @apply shadow-brand-lg scale-105;
+  }
+  .brand-btn:active { @apply scale-95; }
+  .brand-btn:disabled {
+    background: linear-gradient(135deg, #9CA3AF, #6B7280);
+    @apply shadow-none scale-100 cursor-not-allowed;
+  }
+  .chip {
+    @apply px-4 py-2 rounded-full text-sm font-medium border transition-all duration-200 cursor-pointer select-none;
+    background: rgba(168, 85, 247, 0.08);
+    border-color: rgba(168, 85, 247, 0.25);
+    color: #7C3AED;
+  }
+  .chip:hover {
+    background: rgba(168, 85, 247, 0.15);
+    border-color: rgba(168, 85, 247, 0.5);
+    @apply scale-105 shadow-sm;
+  }
+  .chip:active { @apply scale-95; }
+  .dark .chip {
+    background: rgba(168, 85, 247, 0.12);
+    border-color: rgba(168, 85, 247, 0.3);
+    color: #C084FC;
+  }
+  .dark .chip:hover {
+    background: rgba(168, 85, 247, 0.22);
+    border-color: rgba(168, 85, 247, 0.55);
+  }
 }
 
 @layer utilities {
-  .scrollbar-thin::-webkit-scrollbar { width: 4px; }
-  .scrollbar-thin::-webkit-scrollbar-track { @apply bg-transparent; }
-  .scrollbar-thin::-webkit-scrollbar-thumb { @apply bg-gray-300 dark:bg-gray-600 rounded-full; }
+  .scrollbar-premium::-webkit-scrollbar { width: 5px; }
+  .scrollbar-premium::-webkit-scrollbar-track { background: transparent; }
+  .scrollbar-premium::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #A855F7, #7C3AED);
+    border-radius: 99px;
+  }
+  .text-gradient {
+    background: linear-gradient(135deg, #5B21B6, #9333EA, #C084FC);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .bg-app {
+    background: #FAF7FF;
+  }
+  .dark .bg-app {
+    background: #0D0A1A;
+  }
+  .shimmer-bg {
+    background: linear-gradient(90deg, transparent 0%, rgba(168,85,247,0.08) 50%, transparent 100%);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite linear;
+  }
 }
 
-@keyframes pulseDot {
-  0%, 80%, 100% { transform: scale(0); opacity: 0.3; }
-  40%           { transform: scale(1); opacity: 1; }
-}
+/* Prose overrides for markdown in dark mode */
+.dark .prose { color: #E2D9F3; }
+.dark .prose strong { color: #C084FC; }
+.dark .prose h1, .dark .prose h2, .dark .prose h3 { color: #DDD6FE; }
+.dark .prose a { color: #A855F7; }
+.dark .prose code { color: #C084FC; background: rgba(168,85,247,0.15); }
+.dark .prose blockquote { border-left-color: #7C3AED; color: #C4B5FD; }
+.dark .prose ul > li::marker { color: #A855F7; }
+.dark .prose ol > li::marker { color: #A855F7; }
+.dark .prose hr { border-color: rgba(168,85,247,0.2); }
 
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(12px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-.animate-slide-up { animation: slideUp 0.3s ease-out; }
+.prose strong { color: #6D28D9; }
+.prose ul > li::marker { color: #9333EA; }
+.prose ol > li::marker { color: #9333EA; }
+.prose a { color: #7C3AED; }
+.prose code { color: #7C3AED; background: rgba(124,58,237,0.08); padding: 0.1em 0.4em; border-radius: 4px; }
