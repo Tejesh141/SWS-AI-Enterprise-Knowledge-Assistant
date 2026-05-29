@@ -82,20 +82,25 @@ def run_ingestion_pipeline() -> None:
     all_chunks = []
 
     # ── Main pipeline loop ─────────────────────────────────────────────
+    skipped_files: set[str] = set()
+
     for raw_doc in loader.load():
         pages_extracted += 1
+
+        if raw_doc.file_name in skipped_files:
+            continue
 
         if raw_doc.file_name not in seen_files:
             seen_files.add(raw_doc.file_name)
 
             if chroma.document_exists(raw_doc.file_name):
-                # Document already ingested — log and skip to avoid duplicates
                 logger.warning(
                     "Duplicate skipped | file='%s' already in collection",
                     raw_doc.file_name,
                 )
                 duplicates_skipped += 1
-                continue  # Skip all pages of this document
+                skipped_files.add(raw_doc.file_name)
+                continue
 
             docs_processed += 1
 
