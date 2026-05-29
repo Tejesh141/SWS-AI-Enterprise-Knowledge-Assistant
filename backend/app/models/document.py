@@ -47,3 +47,21 @@ class EmbeddedChunk(BaseModel):
     page_number: int
     text: str
     embedding: list[float] = Field(default_factory=list)
+
+
+class RetrievalResult(BaseModel):
+    """
+    A single ranked result returned by the RetrievalService.
+    This is the public-facing contract consumed by the API layer (Phase 2)
+    and any downstream LLM prompt-builder.
+
+    Fields map directly to the four required outputs:
+        chunk_text       → the verbatim text passage to inject into the LLM prompt
+        similarity_score → cosine similarity in [0, 1]; higher = more relevant
+        source_document  → original PDF filename for citation / provenance
+        page_number      → exact page for human verification
+    """
+    chunk_text: str
+    similarity_score: float   # Normalised cosine similarity: 1.0 = identical
+    source_document: str      # e.g. "annual_report_2024.pdf"
+    page_number: int

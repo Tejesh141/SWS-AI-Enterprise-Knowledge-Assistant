@@ -30,6 +30,10 @@ class Settings(BaseSettings):
     chunk_size: int = Field(default=500)
     chunk_overlap: int = Field(default=50)
 
+    # ── Retrieval ──────────────────────────────────────────────────────
+    top_k: int = Field(default=3)                    # Number of chunks to retrieve
+    similarity_threshold: float = Field(default=0.0) # Minimum score to include a result
+
     # ── Logging ────────────────────────────────────────────────────────
     log_level: str = Field(default="INFO")
 

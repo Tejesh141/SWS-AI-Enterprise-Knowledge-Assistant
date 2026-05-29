@@ -88,3 +88,25 @@ class EmbeddingService:
 
         logger.info("Embeddings generated: %d vector(s)", len(embedded_chunks))
         return embedded_chunks
+
+    def embed_query(self, query: str) -> list[float]:
+        """
+        Embed a single query string for retrieval.
+
+        Kept separate from embed_chunks() because:
+        - Queries are always single strings, not DocumentChunk objects
+        - Avoids constructing a throwaway DocumentChunk just to call embed_chunks()
+        - Makes the retrieval call-site cleaner and more readable
+
+        Args:
+            query: The user's natural-language search query.
+
+        Returns:
+            384-dimensional embedding as a plain Python list[float].
+        """
+        vector = self._model.encode(
+            query,
+            show_progress_bar=False,
+            convert_to_numpy=True,
+        )
+        return vector.tolist()

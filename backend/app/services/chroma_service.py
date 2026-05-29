@@ -133,3 +133,31 @@ class ChromaService:
             include=[],  # We only need to know if any result exists
         )
         return len(results["ids"]) > 0
+
+    def query(self, query_embedding: list[float], top_k: int) -> dict:
+        """
+        Run a nearest-neighbour search against the collection.
+
+        ChromaDB returns results sorted by distance (ascending), where
+        distance = 1 - cosine_similarity for a cosine-space collection.
+        We expose the raw dict so RetrievalService can own the conversion
+        to domain objects — keeping this method a pure data-access call
+        (Single Responsibility Principle).
+
+        Args:
+            query_embedding: 384-dim vector produced by EmbeddingService.
+            top_k:           Maximum number of nearest neighbours to return.
+
+        Returns:
+            Raw ChromaDB result dict with keys:
+                ids, documents, metadatas, distances
+        """
+        if self._collection.count() == 0:
+            logger.warning("Collection is empty — run the ingestion pipeline first")
+            return {"ids": [[]], "documents": [[]], "metadatas": [[]], "distances": [[]]}
+
+        return self._collection.query(
+            query_embeddings=[query_embedding],
+            n_results=min(top_k, self._collection.count()),  # Guard: can't exceed total docs
+            include=["documents", "metadatas", "distances"],
+        )
