@@ -18,6 +18,8 @@ FastAPI dependency injection is used to supply services, which means:
       not in the business logic services
 """
 
+from typing import Optional
+
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.models.document import ChatRequest, ChatResponse
@@ -38,8 +40,8 @@ router = APIRouter(prefix="/api", tags=["Chat"])
 # This pattern avoids circular imports and keeps the router decoupled from
 # the application wiring code in main.py.
 
-_retrieval_service: RetrievalService | None = None
-_gemini_service: GeminiService | None = None
+_retrieval_service: Optional[RetrievalService] = None
+_gemini_service: Optional[GeminiService] = None
 
 
 def set_services(

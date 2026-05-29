@@ -34,6 +34,8 @@ Collection name: sws_ai_knowledge_base
     share the same ChromaDB data directory.
 """
 
+from __future__ import annotations
+
 from dataclasses import dataclass
 from pathlib import Path
 

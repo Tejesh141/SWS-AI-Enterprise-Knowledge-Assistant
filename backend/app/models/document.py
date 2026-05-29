@@ -12,6 +12,8 @@ Using Pydantic ensures:
 - Easy serialisation for logging / debugging
 """
 
+from __future__ import annotations
+
 from pydantic import BaseModel, Field
 
 

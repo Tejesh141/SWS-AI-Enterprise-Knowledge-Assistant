@@ -9,6 +9,8 @@ Design:
 - Using dataclass-style Pydantic BaseSettings keeps validation free
 """
 
+from __future__ import annotations
+
 from pathlib import Path
 from pydantic import Field
 from pydantic_settings import BaseSettings  # pydantic v2 split package

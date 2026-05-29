@@ -13,6 +13,8 @@ Why RecursiveCharacterTextSplitter?
 This module does NOT load PDFs or create embeddings.
 """
 
+from __future__ import annotations
+
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 from app.models.document import DocumentChunk, RawDocument

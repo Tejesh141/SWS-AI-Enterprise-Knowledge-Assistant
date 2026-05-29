@@ -31,6 +31,8 @@ Design decisions:
   (CloudWatch, Datadog, ELK, etc.).
 """
 
+from __future__ import annotations
+
 from app.models.document import RetrievalResult
 from app.services.chroma_service import ChromaService
 from app.services.embedding_service import EmbeddingService
@@ -180,14 +182,14 @@ class RetrievalService:
                 RetrievalResult(
                     chunk_text=text,
                     similarity_score=similarity_score,
-                    source_document=meta["file_name"],
+                    source_document=meta["source_document_name"],
                     page_number=meta["page_number"],
                 )
             )
 
             logger.debug(
                 "Result | source='%s' | page=%d | score=%.4f | preview='%s...'",
-                meta["file_name"],
+                meta["source_document_name"],
                 meta["page_number"],
                 similarity_score,
                 text[:60].replace("\n", " "),

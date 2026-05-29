@@ -30,6 +30,8 @@ Design decisions:
       business logic, not HTTP concerns.
 """
 
+from __future__ import annotations
+
 import google.generativeai as genai
 
 from app.models.document import ChatResponse, RetrievalResult, SourceReference

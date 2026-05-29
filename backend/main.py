@@ -20,12 +20,16 @@ Run from /backend:
     uvicorn main:app --reload --port 8000
 """
 
+from __future__ import annotations
+
 from pathlib import Path
 
 from dotenv import load_dotenv
 
 # Load .env BEFORE importing settings — settings reads env vars at import time
 load_dotenv(Path(__file__).resolve().parent / ".env")
+
+from typing import Optional
 
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
@@ -95,7 +99,7 @@ app.include_router(chat_router.router)
 
 class QueryRequest(BaseModel):
     query: str
-    top_k: int | None = None
+    top_k: Optional[int] = None
 
 
 # ── Endpoints ──────────────────────────────────────────────────────────────────

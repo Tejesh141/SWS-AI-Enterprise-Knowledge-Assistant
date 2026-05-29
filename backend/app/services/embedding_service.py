@@ -15,6 +15,8 @@ Design:
 - Returns EmbeddedChunk objects ready for ChromaDB insertion
 """
 
+from __future__ import annotations
+
 from sentence_transformers import SentenceTransformer
 
 from app.models.document import DocumentChunk, EmbeddedChunk
