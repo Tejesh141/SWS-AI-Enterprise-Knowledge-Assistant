@@ -34,6 +34,10 @@ class Settings(BaseSettings):
     top_k: int = Field(default=3)                    # Number of chunks to retrieve
     similarity_threshold: float = Field(default=0.0) # Minimum score to include a result
 
+    # ── Gemini LLM ────────────────────────────────────────────────────
+    gemini_api_key: str = Field(default="")
+    gemini_model: str = Field(default="gemini-1.5-flash")
+
     # ── Logging ────────────────────────────────────────────────────────
     log_level: str = Field(default="INFO")
 

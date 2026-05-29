@@ -65,3 +65,37 @@ class RetrievalResult(BaseModel):
     similarity_score: float   # Normalised cosine similarity: 1.0 = identical
     source_document: str      # e.g. "annual_report_2024.pdf"
     page_number: int
+
+
+# ── Chat API schemas ───────────────────────────────────────────────────────────
+# These are the request/response contracts for POST /api/chat.
+# Keeping them in document.py centralises all domain models in one place.
+
+class ChatRequest(BaseModel):
+    """
+    Incoming payload for POST /api/chat.
+    Validated automatically by FastAPI before the handler is called.
+    """
+    question: str
+
+
+class SourceReference(BaseModel):
+    """
+    A single citation entry in the chat response.
+
+    `document` strips the .pdf extension for a cleaner UI display:
+        "Leave_Policy.pdf"  →  "Leave Policy"
+    """
+    document: str   # Human-readable document name (no extension, underscores → spaces)
+    page: int
+
+
+class ChatResponse(BaseModel):
+    """
+    Response payload for POST /api/chat.
+
+    answer  → Gemini-generated answer grounded strictly in retrieved context.
+    sources → Deduplicated list of source citations for the answer.
+    """
+    answer: str
+    sources: list[SourceReference]
