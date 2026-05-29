@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     chroma_db_dir: Path = Field(default="data/chroma_db")
 
     # ── ChromaDB ───────────────────────────────────────────────────────
-    chroma_collection_name: str = Field(default="enterprise_knowledge_base")
+    chroma_collection_name: str = Field(default="sws_ai_knowledge_base")
 
     # ── Embedding ──────────────────────────────────────────────────────
     embedding_model: str = Field(default="sentence-transformers/all-MiniLM-L6-v2")

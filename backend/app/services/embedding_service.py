@@ -80,6 +80,7 @@ class EmbeddingService:
                 chunk_id=chunk.chunk_id,
                 file_name=chunk.file_name,
                 page_number=chunk.page_number,
+                chunk_index=chunk.chunk_index,  # Carry through for ChromaDB metadata
                 text=chunk.text,
                 embedding=vector.tolist(),  # ChromaDB expects plain Python list[float]
             )

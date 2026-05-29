@@ -71,6 +71,7 @@ class TextChunker:
                 chunk_id=self._build_chunk_id(raw_doc, idx),
                 file_name=raw_doc.file_name,
                 page_number=raw_doc.page_number,
+                chunk_index=idx,   # 0-based position within this page's chunks
                 text=chunk_text,
             )
             for idx, chunk_text in enumerate(raw_chunks)

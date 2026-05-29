@@ -62,6 +62,7 @@ _embedding_svc = EmbeddingService(model_name=settings.embedding_model)
 # 2. ChromaDB — connects to the persisted local vector store
 _chroma_svc = ChromaService(
     db_dir=_base_dir / settings.chroma_db_dir,
+    embedding_service=_embedding_svc,
     collection_name=settings.chroma_collection_name,
 )
 

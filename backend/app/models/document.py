@@ -34,6 +34,7 @@ class DocumentChunk(BaseModel):
     chunk_id: str           # Globally unique ID: "{file_name}_p{page}_c{idx}"
     file_name: str
     page_number: int
+    chunk_index: int        # 0-based position of this chunk within its page
     text: str               # The actual chunk text sent to the embedding model
 
 
@@ -45,8 +46,25 @@ class EmbeddedChunk(BaseModel):
     chunk_id: str
     file_name: str
     page_number: int
+    chunk_index: int        # Preserved from DocumentChunk for ChromaDB metadata
     text: str
     embedding: list[float] = Field(default_factory=list)
+
+
+class SearchResult(BaseModel):
+    """
+    A single result returned by ChromaService.search().
+
+    This is the canonical output shape for the vector search layer:
+        content  → verbatim chunk text for LLM context injection
+        source   → original PDF filename for provenance / citation
+        page     → 1-based page number for human verification
+        score    → cosine similarity in [0.0, 1.0]; higher = more relevant
+    """
+    content: str
+    source: str
+    page: int
+    score: float
 
 
 class RetrievalResult(BaseModel):
